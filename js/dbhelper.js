@@ -146,11 +146,32 @@ class DBHelper {
     return (`./restaurant.html?id=${restaurant.id}`);
   }
 
+  static altForRestaurant(restaurant) {
+    return restaurant.name;
+  }
+
   /**
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return (`/img/${restaurant.photograph}`);
+    return (`/img/${restaurant.id}-medium.jpg`);
+  }
+
+  static sourcesForRestaurant(restaurant) {
+    return [
+      {
+        srcset: `/img/${restaurant.id}-small.jpg`,
+        media: "(max-width: 400px)"
+      },
+      {
+        srcset: `/img/${restaurant.id}-large.jpg`,
+        media: "(min-width: 1000px)"
+      },
+      {
+        srcset: `/img/${restaurant.id}-medium.jpg`,
+      },
+      
+    ]
   }
 
   /**
