@@ -3,6 +3,18 @@
  */
 class DBHelper {
 
+  static get DB_VERSION() {
+    return 1;
+  }
+
+  static get RESTAURANTS_STORES_NAME() {
+    return  "restaurants";
+  }
+
+  static get RESTAURANT_DETAIL_STORE_NAME() {
+    return "restaurant_details";
+  }
+
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
@@ -13,40 +25,113 @@ class DBHelper {
   }
 
   /**
+   * Add restaurants into IndexedDB.
+   */
+
+  static async addRestaurantsIntoIDB(restaurants) {
+    const db = await idb.openDB(DBHelper.RESTAURANTS_STORES_NAME, DBHelper.DB_VERSION, DBHelper.createRestaurantsDB());
+    const tx = db.transaction(DBHelper.RESTAURANTS_STORES_NAME, 'readwrite');
+    restaurants.forEach(async (r) => {
+      tx.store.add(r)
+    });
+    await tx.done;
+  }
+
+
+  /**
+   * Get restaurants from IndexedDB.
+   */
+
+  static async getRestaurantsFromIDB() {
+    const db = await idb.openDB(DBHelper.RESTAURANTS_STORES_NAME, DBHelper.DB_VERSION, DBHelper.createRestaurantsDB());
+    const res = await db.getAllFromIndex(DBHelper.RESTAURANTS_STORES_NAME, 'createdAt');
+    return res;
+  }
+
+
+  static createRestaurantsDB() {
+    return {
+       upgrade(db) {
+        const store = db.createObjectStore(DBHelper.RESTAURANTS_STORES_NAME, {
+          // The 'id' property of the object will be the key.
+          keyPath: 'id',
+          // If it isn't explicitly set, create a value by auto incrementing.
+          autoIncrement: true,
+        });
+        store.createIndex('createdAt', 'createdAt');
+      }
+    }
+  }
+
+  static createRestaurantDB() {
+    return {
+       upgrade(db) {
+        const store = db.createObjectStore(DBHelper.RESTAURANT_DETAIL_STORE_NAME, {
+          // The 'id' property of the object will be the key.
+          keyPath: 'id',
+          // If it isn't explicitly set, create a value by auto incrementing.
+          autoIncrement: true,
+        });
+      }
+    }
+  }
+
+  /**
+   * Add restaurant into IDB.
+   */
+  static async addRestaurantIntoIDB(restaurant) {
+    const db = await idb.openDB(DBHelper.RESTAURANT_DETAIL_STORE_NAME, DBHelper.DB_VERSION, DBHelper.createRestaurantDB());
+    await db.put(DBHelper.RESTAURANT_DETAIL_STORE_NAME, restaurant);
+  }
+
+
+  /**
+   * Get a restaurant from IndexedDB.
+   */
+
+  static async getRestaurantFromIDB(id) {
+    const db = await idb.openDB(DBHelper.RESTAURANT_DETAIL_STORE_NAME, DBHelper.DB_VERSION, DBHelper.createRestaurantDB());
+    const value = await db.get(DBHelper.RESTAURANT_DETAIL_STORE_NAME, Number(id));
+    return value;
+  }
+
+  /**
    * Fetch all restaurants.
    */
-  static fetchRestaurants(callback) {
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', DBHelper.DATABASE_URL);
-    xhr.onload = () => {
-      if (xhr.status === 200) { // Got a success response from server!
-        const json = JSON.parse(xhr.responseText);
-        const restaurants = json;
-        callback(null, restaurants);
-      } else { // Oops!. Got an error from server.
-        const error = (`Request failed. Returned status of ${xhr.status}`);
-        callback(error, null);
+  static async fetchRestaurants(callback) {
+    try {
+      const storedRestaurants = await DBHelper.getRestaurantsFromIDB();
+      if (storedRestaurants.length > 0) {
+        callback(null, storedRestaurants);
+        return;
       }
-    };
-    xhr.send();
+      const res = await fetch(DBHelper.DATABASE_URL);
+      const json = await res.json();
+      callback(null, json);
+      DBHelper.addRestaurantsIntoIDB(json);
+    } catch(e) {
+      callback(e, null);
+    }
   }
 
   /**
    * Fetch a restaurant by its ID.
    */
-  static fetchRestaurantById(id, callback) {
+  static async fetchRestaurantById(id, callback) {
     // fetch all restaurants with proper error handling.
-    let xhr = new XMLHttpRequest();
-    xhr.open('GET', `${DBHelper.DATABASE_URL}/${id}`);
-    xhr.onload = () => {
-      if (xhr.status === 200) {
-        const json = JSON.parse(xhr.responseText);
-        callback(null, json);
-      } else {
-        callback('Restaurant does not exist', null);
+    try {
+      const storedRestaurant = await DBHelper.getRestaurantFromIDB(id);
+      if (storedRestaurant) {
+        callback(null, storedRestaurant);
+        return;
       }
-    };
-    xhr.send();
+      const res = await fetch(`${DBHelper.DATABASE_URL}/${id}`);
+      const json = await res.json();
+      callback(null, json);
+      DBHelper.addRestaurantIntoIDB(json);
+    } catch(e) {
+      callback(e, null);
+    }
   }
 
   /**

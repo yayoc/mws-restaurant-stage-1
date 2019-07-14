@@ -4,8 +4,20 @@ importScripts(
 
 workbox.precaching.precacheAndRoute([
   {
+    "url": "css/images/marker-icon-2x.png",
+    "revision": "401d815dc206b8dc1b17cd0e37695975"
+  },
+  {
+    "url": "css/images/marker-icon.png",
+    "revision": "2273e3d8ad9264b7daa5bdbf8e6b47f8"
+  },
+  {
+    "url": "css/leaflet.css",
+    "revision": "a1a2cb58d77508ef8815fdcad1881c32"
+  },
+  {
     "url": "css/styles.css",
-    "revision": "45ae104a083a175417138b2e04eddfe1"
+    "revision": "3d0ff53d582f4c7e1d9b32bd34baab93"
   },
   {
     "url": "data/restaurants.json",
@@ -133,11 +145,15 @@ workbox.precaching.precacheAndRoute([
   },
   {
     "url": "index.html",
-    "revision": "ab2f626135d6b6936e11b269657550ba"
+    "revision": "c6bea011eff8706fa796bfe9bb7ddcc9"
   },
   {
     "url": "js/dbhelper.js",
-    "revision": "570af0f2828ea0c21b22545854ab14dc"
+    "revision": "487e2724ece3ce0549bf2212bc7a19f2"
+  },
+  {
+    "url": "js/idb.min.js",
+    "revision": "233246e3a879bdb85d51caf346995a19"
   },
   {
     "url": "js/leaflet.js",
@@ -145,15 +161,15 @@ workbox.precaching.precacheAndRoute([
   },
   {
     "url": "js/main.js",
-    "revision": "7b97a88f5a1316c20c06472eadf22641"
+    "revision": "130c00b228a823fd70c2697777218210"
   },
   {
     "url": "js/restaurant_info.js",
-    "revision": "928125993ec698300f88ac548bdb44d6"
+    "revision": "8d79b91d63a47681d9ea1137c1fd5e64"
   },
   {
     "url": "restaurant.html",
-    "revision": "75312207b574c585cc1c15e66101c0c6"
+    "revision": "64739894b05aa472094b317e4a3a51ef"
   }
 ], {
   // Ignore all URL parameters.
