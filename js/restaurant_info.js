@@ -70,6 +70,10 @@ fetchRestaurantFromURL = (callback) => {
         console.error(error);
         return;
       }
+      DBHelper.fetchReviewsByRestaurantId(id, (error, reviews) => {
+        self.restaurant.reviews = reviews;
+        fillReviewsHTML();
+      });
       fillRestaurantHTML();
       callback(null, restaurant)
     });
@@ -109,8 +113,6 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   if (restaurant.operating_hours) {
     fillRestaurantHoursHTML();
   }
-  // fill reviews
-  fillReviewsHTML();
   fillReviewForm();
 }
 
@@ -139,10 +141,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
  */
 fillReviewsHTML = (reviews = self.restaurant.reviews) => {
   const container = document.getElementById('reviews-container');
-  const title = document.createElement('h2');
-  title.innerHTML = 'Reviews';
   const ul = document.getElementById('reviews-list');
-  container.insertBefore(title, ul);
 
   if (!reviews) {
     const noReviews = document.createElement('p');
@@ -182,8 +181,11 @@ fillReviewForm = () => {
           console.error(error);
           window.alert('Thank you for registering review. Your review will be available when you are online.');
         } else {
-          // Remove no reviews label;
-          document.getElementById('no-reviews').remove();
+          // Remove no reviews label if there is;
+          const noReviews = document.getElementById('no-reviews');
+          if (noReviews) {
+            noReviews.remove();
+          }
 
           // Insert new review to reviews section.
           const reviewsList = document.getElementById('reviews-list');
@@ -206,7 +208,7 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  date.innerHTML = new Date(review.createdAt).toDateString();
   li.appendChild(date);
 
   const rating = document.createElement('p');

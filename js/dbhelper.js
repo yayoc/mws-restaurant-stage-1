@@ -152,13 +152,23 @@ class DBHelper {
         body: JSON.stringify(body)
       });
       const json = await res.json();
-      const data = {
-        ...json,
-        date: json.createdAt
-      };
-      callback(data, null);
+      callback(json, null);
     } catch (e) {
       callback(null, e);
+    }
+  }
+
+  /**
+   * Fetch reviews
+   */
+
+  static async fetchReviewsByRestaurantId(id, callback) {
+    try {
+      const res = await fetch(`${DBHelper.REVIEWS_URL}?restaurant_id=${id}`);
+      const json = await res.json();
+      callback(null, json);
+    } catch(e) {
+      callback(e, null);
     }
   }
 
