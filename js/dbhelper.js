@@ -140,6 +140,40 @@ class DBHelper {
   }
 
   /**
+   * Favorite the restaurant
+   */
+  static async favoriteRestaurant(id, callback) {
+    try {
+      const res = await fetch(`${DBHelper.DATABASE_URL}/${id}/?is_favorite=true`, {
+        method: "PUT"
+      });
+      const json = await res.json();
+      DBHelper.addFavoriteRestaurant(id);
+      callback(json, null);
+    } catch (e) {
+      console.error(e);
+      callback(null, e);
+    }
+  }
+
+  /**
+   * Unfavorite the restaurant
+   */
+  static async unfavoriteRestaurant(id, callback) {
+    try {
+      const res = await fetch(`${DBHelper.DATABASE_URL}/${id}/?is_favorite=false`, {
+        method: "PUT"
+      });
+      const json = await res.json();
+      DBHelper.removeFavoriteRestaurant(id);
+      callback(json, null);
+    } catch (e) {
+      console.error(e);
+      callback(null, e);
+    }
+  }
+
+  /**
    * Create a new restaurant review.
    */
   static async createRestaurantReview(body, callback) {
@@ -166,6 +200,20 @@ class DBHelper {
     try {
       const res = await fetch(`${DBHelper.REVIEWS_URL}?restaurant_id=${id}`);
       const json = await res.json();
+      callback(null, json);
+    } catch(e) {
+      callback(e, null);
+    }
+  }
+
+  /**
+   * Fetch all favorite restaurants.
+   */
+  static async fetchFavoriteRestaurants(callback) {
+    try {
+      const res = await fetch(`${DBHelper.DATABASE_URL}?is_favorite=true`);
+      const json = await res.json();
+      DBHelper.setFavoriteRestaurantsIntoLocalStorage(json.map(r => r.id));
       callback(null, json);
     } catch(e) {
       callback(e, null);
@@ -358,6 +406,31 @@ class DBHelper {
     );
     return marker;
   } */
+
+  static getFavoriteRestaurantsFromLocalStorage() {
+    return localStorage.getItem('favorites');
+  }
+
+  static addFavoriteRestaurant(id) {
+    const ids = DBHelper.getFavoriteRestaurantsFromLocalStorage().split(',');
+    const newIds = [...ids, id];
+    return localStorage.setItem('favorites', newIds.join(','));
+  }
+
+  static removeFavoriteRestaurant(id) {
+    const ids = DBHelper.getFavoriteRestaurantsFromLocalStorage().split(',');
+    const newIds = ids.filter(i => i !== id.toString());
+    return localStorage.setItem('favorites', newIds.join(','));
+  }
+
+  static setFavoriteRestaurantsIntoLocalStorage(ids = []) {
+    return localStorage.setItem('favorites', ids.join(','));
+  }
+
+  static isFavoriteRestaurant(id) {
+    const favorites = DBHelper.getFavoriteRestaurantsFromLocalStorage();
+    return favorites.split(',').indexOf(id.toString()) !== -1;
+  }
 
 }
 

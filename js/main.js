@@ -11,7 +11,21 @@ document.addEventListener('DOMContentLoaded', (event) => {
   initMap(); // added 
   fetchNeighborhoods();
   fetchCuisines();
+  fetchFavoriteRestaurants();
 });
+
+/**
+ * Fetch favorite restaurants
+ */
+fetchFavoriteRestaurants = () => {
+  DBHelper.fetchFavoriteRestaurants((error, restaurants) => {
+    if (error) {
+      console.error(error);
+      return;
+    }
+  });
+};
+
 
 /**
  * Fetch all neighborhoods and set their HTML.
@@ -190,10 +204,37 @@ createRestaurantHTML = (restaurant) => {
   const more = document.createElement('a');
   more.innerHTML = 'View Details';
   more.href = DBHelper.urlForRestaurant(restaurant);
-  li.append(more)
+  li.append(more);
 
-  return li
-}
+  const favorite = document.createElement('a');
+  const id = restaurant.id;
+  const favoriteLabel = 'Favorite';
+  const unfavoriteLabel = 'Unfavorite';
+  favorite.innerText = DBHelper.isFavoriteRestaurant(id) ?  unfavoriteLabel : favoriteLabel;
+  favorite.onclick = (e) => {
+    e.preventDefault();
+    if (DBHelper.isFavoriteRestaurant(id)) {
+      DBHelper.unfavoriteRestaurant(id, (res, error) => {
+        if (error) {
+          console.error(error);
+          return;
+        }
+        favorite.innerText = favoriteLabel;
+      })
+    } else {
+      DBHelper.favoriteRestaurant(id, (res, error) => {
+        if (error) {
+          console.error(error);
+          return;
+        }
+        favorite.innerText = unfavoriteLabel;
+      })
+    }
+  };
+
+  li.append(favorite);
+  return li;
+};
 
 /**
  * Add markers for current restaurants to the map.
