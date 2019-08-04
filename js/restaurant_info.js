@@ -111,6 +111,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   }
   // fill reviews
   fillReviewsHTML();
+  fillReviewForm();
 }
 
 /**
@@ -140,20 +141,57 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h2');
   title.innerHTML = 'Reviews';
-  container.appendChild(title);
+  const ul = document.getElementById('reviews-list');
+  container.insertBefore(title, ul);
 
   if (!reviews) {
     const noReviews = document.createElement('p');
+    noReviews.id = 'no-reviews';
     noReviews.innerHTML = 'No reviews yet!';
     container.appendChild(noReviews);
     return;
   }
-  const ul = document.getElementById('reviews-list');
   reviews.forEach(review => {
     ul.appendChild(createReviewHTML(review));
   });
   container.appendChild(ul);
-}
+};
+
+
+/**
+ * Create review form and add them to the webpage.
+ */
+fillReviewForm = () => {
+  const form = document.getElementById('review-form');
+  const inputName = document.getElementById('review-name');
+  const inputRating = document.getElementById('review-rating');
+  const inputComments = document.getElementById('review-comments');
+
+  const button = document.createElement('button');
+  button.innerText = 'submit';
+  button.onclick = (e) => {
+    e.preventDefault();
+    const id = getParameterByName('id');
+    const name = inputName.value;
+    const rating = inputRating.value;
+    const comments = inputComments.value;
+    DBHelper.createRestaurantReview({restaurant_id: id, name, rating, comments}, (res, error) => {
+        if (error) {
+          console.error(error);
+        } else {
+          // Remove no reviews label;
+          document.getElementById('no-reviews').remove();
+
+          // Insert new review to reviews section.
+          const reviewsList = document.getElementById('reviews-list');
+          const li = createReviewHTML(res);
+          reviewsList.appendChild(li);
+        }
+    });
+  };
+  form.appendChild(button);
+};
+
 
 /**
  * Create review HTML and add it to the webpage.

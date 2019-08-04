@@ -20,9 +20,15 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static get DATABASE_URL() {
-    const port = 1337 // Change this to your server port
+    const port = 1337; // Change this to your server port
     return `http://localhost:${port}/restaurants`;
   }
+
+  static get REVIEWS_URL() {
+    const port = 1337; // Change this to your server port
+    return `http://localhost:${port}/reviews`;
+  }
+
 
   /**
    * Add restaurants into IndexedDB.
@@ -93,6 +99,29 @@ class DBHelper {
     const db = await idb.openDB(DBHelper.RESTAURANT_DETAIL_STORE_NAME, DBHelper.DB_VERSION, DBHelper.createRestaurantDB());
     const value = await db.get(DBHelper.RESTAURANT_DETAIL_STORE_NAME, Number(id));
     return value;
+  }
+
+  /**
+   * Create a new restaurant review.
+   */
+  static async createRestaurantReview(body, callback) {
+    try {
+      const res = await fetch(DBHelper.REVIEWS_URL, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
+      const json = await res.json();
+      const data = {
+        ...json,
+        date: json.createdAt
+      };
+      callback(data, null);
+    } catch (e) {
+      callback(null, e);
+    }
   }
 
   /**
