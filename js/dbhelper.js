@@ -124,6 +124,22 @@ class DBHelper {
   }
 
   /**
+   * Get a stored review request from IDB.
+   */
+  static async getReviewRequestFromIDB() {
+    const db = await idb.openDB(DBHelper.REVIEW_REQUEST_STORE_NAME, DBHelper.DB_VERSION, DBHelper.createReviewRequestDB());
+    const value = await db.getAll(DBHelper.REVIEW_REQUEST_STORE_NAME);
+    return value[0];
+  }
+
+  /**
+   * Delete review request from IDB.
+   */
+  static async deleteReviewRequestFromIDB() {
+    await idb.deleteDB(DBHelper.REVIEW_REQUEST_STORE_NAME);
+  }
+
+  /**
    * Create a new restaurant review.
    */
   static async createRestaurantReview(body, callback) {

@@ -180,6 +180,7 @@ fillReviewForm = () => {
         if (error) {
           DBHelper.addReviewRequestIntoIDB(body);
           console.error(error);
+          window.alert('Thank you for registering review. Your review will be available when you are online.');
         } else {
           // Remove no reviews label;
           document.getElementById('no-reviews').remove();
