@@ -175,8 +175,10 @@ fillReviewForm = () => {
     const name = inputName.value;
     const rating = inputRating.value;
     const comments = inputComments.value;
-    DBHelper.createRestaurantReview({restaurant_id: id, name, rating, comments}, (res, error) => {
+    const body = {restaurant_id: id, name, rating, comments};
+    DBHelper.createRestaurantReview(body, (res, error) => {
         if (error) {
+          DBHelper.addReviewRequestIntoIDB(body);
           console.error(error);
         } else {
           // Remove no reviews label;

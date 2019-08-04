@@ -15,6 +15,10 @@ class DBHelper {
     return "restaurant_details";
   }
 
+  static get REVIEW_REQUEST_STORE_NAME() {
+    return "review_request";
+  }
+
   /**
    * Database URL.
    * Change this to restaurants.json file location on your server.
@@ -82,6 +86,16 @@ class DBHelper {
     }
   }
 
+  static createReviewRequestDB() {
+    return {
+      upgrade(db) {
+        const store = db.createObjectStore(DBHelper.REVIEW_REQUEST_STORE_NAME, {
+          autoIncrement: true,
+        });
+      }
+    }
+  }
+
   /**
    * Add restaurant into IDB.
    */
@@ -99,6 +113,14 @@ class DBHelper {
     const db = await idb.openDB(DBHelper.RESTAURANT_DETAIL_STORE_NAME, DBHelper.DB_VERSION, DBHelper.createRestaurantDB());
     const value = await db.get(DBHelper.RESTAURANT_DETAIL_STORE_NAME, Number(id));
     return value;
+  }
+
+  /**
+   * Add review request into IDB to defer submission of the form.
+   */
+  static async addReviewRequestIntoIDB(review) {
+    const db = await idb.openDB(DBHelper.REVIEW_REQUEST_STORE_NAME, DBHelper.DB_VERSION, DBHelper.createReviewRequestDB());
+    await db.put(DBHelper.REVIEW_REQUEST_STORE_NAME, review);
   }
 
   /**
